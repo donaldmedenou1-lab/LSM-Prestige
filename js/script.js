@@ -1,253 +1,405 @@
-const $ = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
+/*
+========================================
+LSM — LA SOLUTION MULTIMÉDIA
+JavaScript principal
+========================================
+*/
+
+/*
+On indique au CSS que JavaScript est bien actif.
+Ainsi les animations .reveal peuvent fonctionner.
+Si JS ne fonctionne pas, le contenu reste quand même visible.
+*/
+document.documentElement.classList.add("js-ready");
+
+
+/* =========================
+SELECTEURS
+========================= */
+
+const $ = (selector) => document.querySelector(selector);
+
+const $$ = (selector) => document.querySelectorAll(selector);
+
+
+/* =========================
+ELEMENTS
+========================= */
 
 const header = $("#header");
 const progress = $("#progress");
 const menu = $("#menu");
 const nav = $("#nav");
+const topButton = $("#top");
+
+
+/* =========================
+SCROLL
+========================= */
 
 addEventListener("scroll", () => {
 
-    header.classList.toggle("scrolled", scrollY > 20);
+    /* Header */
+    header.classList.toggle(
+        "scrolled",
+        scrollY > 20
+    );
 
+
+    /* Barre de progression */
     const max =
-        document.documentElement.scrollHeight - innerHeight;
+        document.documentElement.scrollHeight -
+        innerHeight;
 
     progress.style.width =
-        (max ? scrollY / max * 100 : 0) + "%";
+        (max ? (scrollY / max) * 100 : 0) + "%";
 
-    const top = $("#top");
 
-    if (top) {
-        top.classList.toggle("top-button", scrollY > 600);
-    }
+    /* Bouton retour en haut */
+    topButton.classList.toggle(
+        "show",
+        scrollY > 600
+    );
 
 });
 
 
-menu.addEventListener("click", () => {
-    nav.classList.toggle("open");
-});
+/* =========================
+MENU MOBILE
+========================= */
+
+if (menu) {
+
+    menu.addEventListener("click", () => {
+
+        nav.classList.toggle("open");
+
+    });
+
+}
 
 
-$$("#nav a").forEach(a => {
+/* Fermer le menu après avoir cliqué */
 
-    a.addEventListener("click", () => {
+$$("#nav a").forEach((link) => {
+
+    link.addEventListener("click", () => {
+
         nav.classList.remove("open");
+
     });
 
 });
 
 
-const io = new IntersectionObserver(
-    entries => {
+/* =========================
+ANIMATIONS REVEAL
+========================= */
 
-        entries.forEach(entry => {
+const revealObserver =
+    new IntersectionObserver(
 
-            if (entry.isIntersecting) {
+        (entries) => {
 
-                entry.target.classList.add("visible");
+            entries.forEach((entry) => {
 
-                io.unobserve(entry.target);
+                if (entry.isIntersecting) {
 
-            }
+                    entry.target.classList.add("visible");
 
-        });
+                    revealObserver.unobserve(
+                        entry.target
+                    );
 
-    },
-    {
-        threshold: 0.12
-    }
-);
+                }
+
+            });
+
+        },
+
+        {
+            threshold: 0.12
+        }
+
+    );
 
 
-$$(".reveal").forEach(element => {
-    io.observe(element);
+$$(".reveal").forEach((element) => {
+
+    revealObserver.observe(element);
+
 });
 
+
+/* =========================
+COMPTEUR 360
+========================= */
 
 let counted = false;
 
 const counters = $$("[data-count]");
 
-const counterObserver = new IntersectionObserver(
-    entries => {
+const counterObserver =
+    new IntersectionObserver(
 
-        entries.forEach(entry => {
+        (entries) => {
 
-            if (entry.isIntersecting && !counted) {
+            entries.forEach((entry) => {
 
-                counted = true;
+                if (
+                    entry.isIntersecting &&
+                    !counted
+                ) {
 
-                counters.forEach(element => {
+                    counted = true;
 
-                    let number = 0;
+                    counters.forEach((element) => {
 
-                    const target =
-                        Number(element.dataset.count);
+                        let number = 0;
 
-                    const timer = setInterval(() => {
+                        const target =
+                            Number(
+                                element.dataset.count
+                            );
 
-                        number =
-                            Math.min(target, number + 12);
+                        const timer =
+                            setInterval(() => {
 
-                        element.textContent = number;
+                                number =
+                                    Math.min(
+                                        target,
+                                        number + 12
+                                    );
 
-                        if (number >= target) {
-                            clearInterval(timer);
-                        }
+                                element.textContent =
+                                    number;
 
-                    }, 30);
+                                if (
+                                    number >= target
+                                ) {
 
-                });
+                                    clearInterval(timer);
 
-            }
+                                }
 
-        });
+                            }, 30);
 
-    }
-);
+                    });
+
+                }
+
+            });
+
+        }
+
+    );
 
 
-counters.forEach(element => {
+counters.forEach((element) => {
+
     counterObserver.observe(element);
+
 });
 
 
-const activeObserver = new IntersectionObserver(
-    entries => {
+/* =========================
+NAVIGATION ACTIVE
+========================= */
 
-        entries.forEach(entry => {
+const activeObserver =
+    new IntersectionObserver(
 
-            if (entry.isIntersecting) {
+        (entries) => {
 
-                $$("#nav a").forEach(link => {
+            entries.forEach((entry) => {
 
-                    link.classList.toggle(
-                        "active",
-                        link.getAttribute("href") ===
-                        "#" + entry.target.id
-                    );
+                if (entry.isIntersecting) {
 
-                });
+                    $$("#nav a").forEach((link) => {
 
-            }
+                        link.classList.toggle(
+                            "active",
+                            link.getAttribute("href") ===
+                            "#" + entry.target.id
+                        );
 
-        });
+                    });
 
-    },
-    {
-        rootMargin: "-35% 0 -55% 0"
-    }
-);
+                }
+
+            });
+
+        },
+
+        {
+            rootMargin:
+                "-35% 0 -55% 0"
+        }
+
+    );
 
 
-$$("main section[id]").forEach(section => {
+$$("main section[id]").forEach((section) => {
+
     activeObserver.observe(section);
+
 });
 
 
-const topButton = $("#top");
+/* =========================
+RETOUR EN HAUT
+========================= */
 
 if (topButton) {
 
-    topButton.addEventListener("click", () => {
+    topButton.addEventListener(
+        "click",
+        () => {
 
-        scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
+            scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
 
-    });
+        }
+    );
 
 }
 
+
+/* =========================
+ANNEE FOOTER
+========================= */
 
 const year = $("#year");
 
 if (year) {
-    year.textContent = new Date().getFullYear();
+
+    year.textContent =
+        new Date().getFullYear();
+
 }
 
 
-/* FORMULAIRE */
+/* =========================
+FORMULAIRE LSM
+========================= */
 
-$("#form").addEventListener("submit", async event => {
+const form = $("#form");
 
-    event.preventDefault();
+if (form) {
 
-    const form = event.currentTarget;
+    form.addEventListener(
+        "submit",
+        async (event) => {
 
-    const note = $("#formNote");
+            event.preventDefault();
 
-    const button =
-        form.querySelector('button[type="submit"]');
 
-    const name =
-        $("#name").value.trim();
+            const note =
+                $("#formNote");
 
-    note.classList.remove("error");
+            const button =
+                form.querySelector(
+                    'button[type="submit"]'
+                );
 
-    note.textContent =
-        "Envoi de votre demande…";
+            const name =
+                $("#name").value.trim();
 
-    button.disabled = true;
 
-    try {
+            note.textContent =
+                "Envoi de votre demande…";
 
-        const response = await fetch(
-            form.action,
-            {
-                method: "POST",
+            button.disabled = true;
 
-                headers: {
-                    "Accept": "application/json"
-                },
 
-                body: new FormData(form)
+            try {
+
+                /*
+                FormSubmit accepte l'envoi AJAX
+                sans quitter la page.
+                */
+
+                const response =
+                    await fetch(
+                        form.action,
+                        {
+                            method: "POST",
+
+                            headers: {
+                                Accept:
+                                    "application/json"
+                            },
+
+                            body:
+                                new FormData(form)
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "send"
+                    );
+
+                }
+
+
+                note.textContent =
+                    "Merci " +
+                    name +
+                    ". Votre demande a bien été envoyée.";
+
+
+                form.reset();
+
+
+            } catch (error) {
+
+                note.textContent =
+                    "L’envoi a échoué. Vérifiez votre connexion puis réessayez.";
+
+            } finally {
+
+                button.disabled = false;
+
             }
-        );
 
-        if (!response.ok) {
-            throw new Error("send");
         }
+    );
 
-        note.textContent =
-            "Merci " + name +
-            ". Votre demande a bien été envoyée.";
-
-        form.reset();
-
-    } catch (error) {
-
-        note.classList.add("error");
-
-        note.textContent =
-            "L’envoi a échoué. Vérifiez votre connexion puis réessayez.";
-
-    } finally {
-
-        button.disabled = false;
-
-    }
-
-});
+}
 
 
-/* CURSEUR PC */
+/* =========================
+CURSEUR PC
+========================= */
 
-if (matchMedia("(pointer:fine)").matches) {
+if (
+    matchMedia(
+        "(pointer:fine)"
+    ).matches
+) {
 
     const cursor = $("#cursor");
 
-    document.addEventListener("mousemove", event => {
+    if (cursor) {
 
-        cursor.style.left =
-            event.clientX + "px";
+        document.addEventListener(
+            "mousemove",
+            (event) => {
 
-        cursor.style.top =
-            event.clientY + "px";
+                cursor.style.left =
+                    event.clientX + "px";
 
-    });
+                cursor.style.top =
+                    event.clientY + "px";
+
+            }
+        );
+
+    }
 
 }
