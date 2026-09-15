@@ -1,105 +1,91 @@
-/*
-========================================
-LSM — LA SOLUTION MULTIMÉDIA
-JavaScript principal
-========================================
-*/
+/* =========================================================
+   LSM — LA SOLUTION MULTIMÉDIA
+   JavaScript principal
+   ========================================================= */
 
-/*
-On indique au CSS que JavaScript est bien actif.
-Ainsi les animations .reveal peuvent fonctionner.
-Si JS ne fonctionne pas, le contenu reste quand même visible.
-*/
 document.documentElement.classList.add("js-ready");
 
-
-/* =========================
-SELECTEURS
-========================= */
-
 const $ = (selector) => document.querySelector(selector);
-
 const $$ = (selector) => document.querySelectorAll(selector);
 
 
-/* =========================
-ELEMENTS
-========================= */
+/* =========================================================
+   HEADER + BARRE DE PROGRESSION
+   ========================================================= */
 
 const header = $("#header");
 const progress = $("#progress");
+
+function updateScroll() {
+
+    if (header) {
+        header.classList.toggle("scrolled", window.scrollY > 20);
+    }
+
+    if (progress) {
+        const maxScroll =
+            document.documentElement.scrollHeight - window.innerHeight;
+
+        const percentage =
+            maxScroll > 0
+                ? (window.scrollY / maxScroll) * 100
+                : 0;
+
+        progress.style.width = percentage + "%";
+    }
+
+}
+
+window.addEventListener("scroll", updateScroll, { passive: true });
+
+updateScroll();
+
+
+/* =========================================================
+   MENU MOBILE
+   ========================================================= */
+
 const menu = $("#menu");
 const nav = $("#nav");
-const topButton = $("#top");
 
-
-/* =========================
-SCROLL
-========================= */
-
-addEventListener("scroll", () => {
-
-    /* Header */
-    header.classList.toggle(
-        "scrolled",
-        scrollY > 20
-    );
-
-
-    /* Barre de progression */
-    const max =
-        document.documentElement.scrollHeight -
-        innerHeight;
-
-    progress.style.width =
-        (max ? (scrollY / max) * 100 : 0) + "%";
-
-
-    /* Bouton retour en haut */
-    topButton.classList.toggle(
-        "show",
-        scrollY > 600
-    );
-
-});
-
-
-/* =========================
-MENU MOBILE
-========================= */
-
-if (menu) {
+if (menu && nav) {
 
     menu.addEventListener("click", () => {
 
         nav.classList.toggle("open");
+
+        menu.setAttribute(
+            "aria-expanded",
+            nav.classList.contains("open")
+        );
+
+    });
+
+    $$("#nav a").forEach((link) => {
+
+        link.addEventListener("click", () => {
+
+            nav.classList.remove("open");
+
+            menu.setAttribute("aria-expanded", "false");
+
+        });
 
     });
 
 }
 
 
-/* Fermer le menu après avoir cliqué */
+/* =========================================================
+   ANIMATIONS AU SCROLL
+   ========================================================= */
 
-$$("#nav a").forEach((link) => {
+const revealElements = $$(".reveal");
 
-    link.addEventListener("click", () => {
+if ("IntersectionObserver" in window) {
 
-        nav.classList.remove("open");
-
-    });
-
-});
-
-
-/* =========================
-ANIMATIONS REVEAL
-========================= */
-
-const revealObserver =
-    new IntersectionObserver(
-
-        (entries) => {
+    const revealObserver = new IntersectionObserver(
+        (entries, observer) => {
 
             entries.forEach((entry) => {
 
@@ -107,120 +93,134 @@ const revealObserver =
 
                     entry.target.classList.add("visible");
 
-                    revealObserver.unobserve(
-                        entry.target
-                    );
+                    observer.unobserve(entry.target);
 
                 }
 
             });
 
         },
-
         {
             threshold: 0.12
         }
-
     );
 
+    revealElements.forEach((element) => {
+        revealObserver.observe(element);
+    });
 
-$$(".reveal").forEach((element) => {
+} else {
 
-    revealObserver.observe(element);
+    revealElements.forEach((element) => {
+        element.classList.add("visible");
+    });
 
-});
+}
 
 
-/* =========================
-COMPTEUR 360
-========================= */
-
-let counted = false;
+/* =========================================================
+   COMPTEURS DES STATISTIQUES
+   ========================================================= */
 
 const counters = $$("[data-count]");
+let countersStarted = false;
 
-const counterObserver =
-    new IntersectionObserver(
+if (counters.length && "IntersectionObserver" in window) {
 
-        (entries) => {
+    const counterObserver = new IntersectionObserver(
+        (entries, observer) => {
 
             entries.forEach((entry) => {
 
                 if (
                     entry.isIntersecting &&
-                    !counted
+                    !countersStarted
                 ) {
 
-                    counted = true;
+                    countersStarted = true;
 
                     counters.forEach((element) => {
 
-                        let number = 0;
-
                         const target =
-                            Number(
-                                element.dataset.count
-                            );
+                            parseInt(element.dataset.count, 10) || 0;
 
-                        const timer =
-                            setInterval(() => {
+                        let current = 0;
 
-                                number =
-                                    Math.min(
-                                        target,
-                                        number + 12
-                                    );
+                        const duration = 900;
+                        const stepTime = 30;
+                        const steps = Math.max(
+                            1,
+                            Math.ceil(duration / stepTime)
+                        );
 
-                                element.textContent =
-                                    number;
+                        const increment = target / steps;
 
-                                if (
-                                    number >= target
-                                ) {
+                        const timer = setInterval(() => {
 
-                                    clearInterval(timer);
+                            current += increment;
 
-                                }
+                            if (current >= target) {
 
-                            }, 30);
+                                current = target;
+
+                                clearInterval(timer);
+
+                            }
+
+                            element.textContent =
+                                Math.floor(current);
+
+                        }, stepTime);
 
                     });
+
+                    observer.disconnect();
 
                 }
 
             });
 
+        },
+        {
+            threshold: 0.3
         }
-
     );
 
+    counters.forEach((element) => {
+        counterObserver.observe(element);
+    });
 
-counters.forEach((element) => {
-
-    counterObserver.observe(element);
-
-});
+}
 
 
-/* =========================
-NAVIGATION ACTIVE
-========================= */
+/* =========================================================
+   NAVIGATION ACTIVE
+   ========================================================= */
 
-const activeObserver =
-    new IntersectionObserver(
+const sections = $$("main section[id]");
+const navLinks = $$("#nav a");
 
+if (
+    sections.length &&
+    navLinks.length &&
+    "IntersectionObserver" in window
+) {
+
+    const activeObserver = new IntersectionObserver(
         (entries) => {
 
             entries.forEach((entry) => {
 
                 if (entry.isIntersecting) {
 
-                    $$("#nav a").forEach((link) => {
+                    navLinks.forEach((link) => {
+
+                        const href =
+                            link.getAttribute("href");
 
                         link.classList.toggle(
                             "active",
-                            link.getAttribute("href") ===
-                            "#" + entry.target.id
+                            href === "#" + entry.target.id
                         );
 
                     });
@@ -230,176 +230,229 @@ const activeObserver =
             });
 
         },
-
         {
-            rootMargin:
-                "-35% 0 -55% 0"
+            rootMargin: "-35% 0px -55% 0px"
         }
-
     );
 
+    sections.forEach((section) => {
+        activeObserver.observe(section);
+    });
 
-$$("main section[id]").forEach((section) => {
+}
 
-    activeObserver.observe(section);
+
+/* =========================================================
+   BOUTON RETOUR EN HAUT
+   ========================================================= */
+
+const topButton = $("#top");
+
+if (topButton) {
+
+    /* Afficher / cacher le bouton */
+    const updateTopButton = () => {
+
+        if (window.scrollY > 500) {
+            topButton.classList.add("show");
+        } else {
+            topButton.classList.remove("show");
+        }
+
+    };
+
+    window.addEventListener(
+        "scroll",
+        updateTopButton,
+        { passive: true }
+    );
+
+    updateTopButton();
+
+
+    /* Retour en haut */
+
+    topButton.addEventListener("click", (event) => {
+
+        event.preventDefault();
+
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: "smooth"
+        });
+
+    });
+
+}
+
+
+/* =========================================================
+   LIENS ANCRES — SCROLL FLUIDE
+   ========================================================= */
+
+$$('a[href^="#"]').forEach((link) => {
+
+    link.addEventListener("click", (event) => {
+
+        const targetId =
+            link.getAttribute("href");
+
+        if (
+            !targetId ||
+            targetId === "#" ||
+            targetId === "#top"
+        ) {
+            return;
+        }
+
+        const target =
+            document.querySelector(targetId);
+
+        if (!target) {
+            return;
+        }
+
+        event.preventDefault();
+
+        target.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+    });
 
 });
 
 
-/* =========================
-RETOUR EN HAUT
-========================= */
-
-if (topButton) {
-
-    topButton.addEventListener(
-        "click",
-        () => {
-
-            scrollTo({
-                top: 0,
-                behavior: "smooth"
-            });
-
-        }
-    );
-
-}
-
-
-/* =========================
-ANNEE FOOTER
-========================= */
+/* =========================================================
+   ANNÉE AUTOMATIQUE DANS LE FOOTER
+   ========================================================= */
 
 const year = $("#year");
 
 if (year) {
-
-    year.textContent =
-        new Date().getFullYear();
-
+    year.textContent = new Date().getFullYear();
 }
 
 
-/* =========================
-FORMULAIRE LSM
-========================= */
+/* =========================================================
+   FORMULAIRE DE CONTACT
+   ========================================================= */
 
 const form = $("#form");
+const formNote = $("#formNote");
 
 if (form) {
 
-    form.addEventListener(
-        "submit",
-        async (event) => {
+    form.addEventListener("submit", async (event) => {
 
-            event.preventDefault();
+        event.preventDefault();
 
+        const submitButton =
+            form.querySelector('button[type="submit"]');
 
-            const note =
-                $("#formNote");
+        const nameInput = $("#name");
 
-            const button =
-                form.querySelector(
-                    'button[type="submit"]'
-                );
+        const name =
+            nameInput
+                ? nameInput.value.trim()
+                : "";
 
-            const name =
-                $("#name").value.trim();
-
-
-            note.textContent =
+        if (formNote) {
+            formNote.textContent =
                 "Envoi de votre demande…";
+        }
 
-            button.disabled = true;
+        if (submitButton) {
+            submitButton.disabled = true;
+        }
 
+        try {
 
-            try {
-
-                /*
-                FormSubmit accepte l'envoi AJAX
-                sans quitter la page.
-                */
-
-                const response =
-                    await fetch(
-                        form.action,
-                        {
-                            method: "POST",
-
-                            headers: {
-                                Accept:
-                                    "application/json"
-                            },
-
-                            body:
-                                new FormData(form)
-                        }
-                    );
-
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        "send"
-                    );
-
+            const response = await fetch(
+                form.action,
+                {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json"
+                    },
+                    body: new FormData(form)
                 }
+            );
 
+            if (!response.ok) {
+                throw new Error("Erreur lors de l'envoi");
+            }
 
-                note.textContent =
-                    "Merci " +
-                    name +
-                    ". Votre demande a bien été envoyée.";
+            if (formNote) {
 
+                formNote.textContent =
+                    name
+                        ? `Merci ${name}. Votre demande a bien été envoyée.`
+                        : "Merci. Votre demande a bien été envoyée.";
 
-                form.reset();
+            }
 
+            form.reset();
 
-            } catch (error) {
+        } catch (error) {
 
-                note.textContent =
+            console.error(error);
+
+            if (formNote) {
+
+                formNote.textContent =
                     "L’envoi a échoué. Vérifiez votre connexion puis réessayez.";
 
-            } finally {
+            }
 
-                button.disabled = false;
+        } finally {
 
+            if (submitButton) {
+                submitButton.disabled = false;
             }
 
         }
-    );
+
+    });
 
 }
 
 
-/* =========================
-CURSEUR PC
-========================= */
+/* =========================================================
+   CURSEUR PERSONNALISÉ — PC UNIQUEMENT
+   ========================================================= */
+
+const cursor = $("#cursor");
 
 if (
-    matchMedia(
-        "(pointer:fine)"
-    ).matches
+    cursor &&
+    window.matchMedia("(pointer:fine)").matches
 ) {
 
-    const cursor = $("#cursor");
+    document.addEventListener("mousemove", (event) => {
 
-    if (cursor) {
+        cursor.style.left =
+            event.clientX + "px";
 
-        document.addEventListener(
-            "mousemove",
-            (event) => {
+        cursor.style.top =
+            event.clientY + "px";
 
-                cursor.style.left =
-                    event.clientX + "px";
-
-                cursor.style.top =
-                    event.clientY + "px";
-
-            }
-        );
-
-    }
+    });
 
 }
+
+
+/* =========================================================
+   PROTECTION CONTRE LE DÉBORDEMENT HORIZONTAL
+   ========================================================= */
+
+/*
+   Si un élément dépasse accidentellement la largeur
+   de l'écran, le site ne doit plus créer de déplacement
+   horizontal vers la droite.
+*/
+
+document.documentElement.style.overflowX = "hidden";
+document.body.style.overflowX = "hidden";
