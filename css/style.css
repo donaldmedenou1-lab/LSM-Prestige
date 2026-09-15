@@ -2968,3 +2968,120 @@ button {
         }
     }
 }
+/* =========================================================
+   HEADER + LOGO — AGRANDISSEMENT ET GRAS
+   Ne modifie pas la responsive du site
+   ========================================================= */
+
+/* Logo principal */
+.mark {
+    width: 62px !important;
+    height: 54px !important;
+    font-size: 25px !important;
+    font-weight: 900 !important;
+    font-family: Manrope, Arial, sans-serif !important;
+    border-width: 3px !important;
+}
+
+/* Nom LSM */
+.brand-name strong {
+    font-size: 18px !important;
+    font-weight: 900 !important;
+    font-family: Manrope, Arial, sans-serif !important;
+}
+
+/* LA SOLUTION MULTIMÉDIA */
+.brand-name em {
+    font-size: 14px !important;
+    font-weight: 900 !important;
+    font-style: normal !important;
+    letter-spacing: 2px !important;
+}
+
+/* Tous les liens du menu */
+.nav nav a {
+    font-size: 16px !important;
+    font-weight: 900 !important;
+    font-family: Manrope, Arial, sans-serif !important;
+}
+
+/* Bouton CONTACT du header */
+.top-cta {
+    font-size: 14px !important;
+    font-weight: 900 !important;
+    font-family: Manrope, Arial, sans-serif !important;
+}
+
+/* Le + du bouton contact */
+.top-cta b {
+    font-weight: 900 !important;
+}
+
+/* =========================================================
+   GARDE LA RESPONSIVE EXISTANTE
+   ========================================================= */
+
+/* Tablette */
+@media (max-width: 950px) {
+
+    .mark {
+        width: 54px !important;
+        height: 47px !important;
+        font-size: 22px !important;
+    }
+
+    .brand-name strong {
+        font-size: 15px !important;
+    }
+
+    .brand-name em {
+        font-size: 11px !important;
+    }
+
+    .nav nav a {
+        font-size: 15px !important;
+    }
+}
+
+
+/* Téléphone */
+@media (max-width: 650px) {
+
+    .mark {
+        width: 49px !important;
+        height: 42px !important;
+        font-size: 20px !important;
+    }
+
+    .brand-name strong {
+        font-size: 13px !important;
+    }
+
+    .brand-name em {
+        font-size: 10px !important;
+    }
+
+    .nav nav a {
+        font-size: 15px !important;
+    }
+}
+
+
+/* Très petit téléphone */
+@media (max-width: 480px) {
+
+    .mark {
+        width: 46px !important;
+        height: 40px !important;
+        font-size: 18px !important;
+    }
+
+    .brand-name strong {
+        font-size: 12px !important;
+    }
+
+    .brand-name em {
+        font-size: 9px !important;
+        letter-spacing: 1.5px !important;
+    }
+}
