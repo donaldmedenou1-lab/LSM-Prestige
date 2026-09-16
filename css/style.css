@@ -3085,3 +3085,8 @@ button {
         letter-spacing: 1.5px !important;
     }
 }
+#nav a {
+  font-weight: 700;
+}
+
+
