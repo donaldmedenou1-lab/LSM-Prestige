@@ -625,12 +625,33 @@
         </div>
 
 
-        <!-- FORMULAIRE EMAILJS -->
+        <!-- FORMULAIRE FORMSUBMIT CORRIGÉ -->
 
         <form
             class="form reveal"
             id="form"
+            action="https://formsubmit.co/medenoufabrice@gmail.com"
+            method="POST"
         >
+
+            <input
+                type="hidden"
+                name="_subject"
+                value="Nouvelle demande — LSM"
+            >
+
+            <input
+                type="hidden"
+                name="_captcha"
+                value="false"
+            >
+
+            <input
+                type="hidden"
+                name="_template"
+                value="table"
+            >
+
 
             <div class="row">
 
@@ -653,7 +674,7 @@
 
                     <input
                         id="email"
-                        name="email"
+                        name="_replyto"
                         type="email"
                         required
                         placeholder="vous@exemple.com"
@@ -827,36 +848,7 @@
 </button>
 
 
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>
-  (function() {
-    emailjs.init({
-      publicKey: "0TbfJO5zKNSAUxvVO",
-    });
-  })();
-</script>
-
 <script src="js/script.js"></script>
-
-<script>
-  const lsmForm = document.getElementById('form');
-  const lsmFormNote = document.getElementById('formNote');
-
-  lsmForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    lsmFormNote.textContent = "Envoi en cours...";
-
-    emailjs.sendForm('service_lr96m7a', 'template_n1xs3wj', lsmForm)
-      .then(function() {
-        lsmFormNote.textContent = "✅ Message envoyé avec succès !";
-        lsmForm.reset();
-      }, function(error) {
-        lsmFormNote.textContent = "❌ Erreur lors de l'envoi. Réessaie.";
-        console.log('Erreur EmailJS :', error);
-      });
-  });
-</script>
 
 </body>
 </html>
