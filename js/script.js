@@ -442,10 +442,10 @@ if (year) {
    FORMULAIRE DE CONTACT
    =========================================================
 
-   L'envoi du formulaire est géré par EmailJS via un script
-   inline dans index.html (juste avant la fermeture de
-   </body>). Ce fichier ne contient volontairement aucun
-   gestionnaire d'événement submit pour éviter tout conflit.
+   Le formulaire est maintenant envoyé directement
+   à FormSubmit avec la méthode POST.
+
+   Aucun JavaScript n'intercepte l'envoi.
    ========================================================= */
 
 
